@@ -6,11 +6,17 @@ server:
   status: true
   open: false
   port: 5002
-  host: 0.0.0.0
+  host: localhost
 schema:
 - name: app
   path: .
-  commands: {}
+  commands:
+    build:
+      status: true
+      method: go build -o /go/bin/api
+    run:
+      status: true
+      method: /go/bin/api
   watcher:
     extensions:
     - go
