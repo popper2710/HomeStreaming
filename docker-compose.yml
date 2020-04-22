@@ -1,12 +1,15 @@
-version: "3"
+version: "3.7"
 
 services:
   golang:
     tty: true
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
     volumes:
       - ./app:/go/src/github.com/home_streaming/app
     ports:
       - 3000:3000
-    command: sh -c "cd app && realize start --run --server"
+    command: sh -c "cd app && realize start --run"
 

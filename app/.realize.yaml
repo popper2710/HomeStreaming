@@ -2,21 +2,16 @@ settings:
   legacy:
     force: false
     interval: 0s
-server:
-  status: true
-  open: false
-  port: 5002
-  host: localhost
 schema:
 - name: app
   path: .
   commands:
-    build:
+    install:
       status: true
-      method: go build -o /go/bin/api
+      method: go build -o app
     run:
       status: true
-      method: /go/bin/api
+      method: ./app
   watcher:
     extensions:
     - go
