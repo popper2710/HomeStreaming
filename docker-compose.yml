@@ -11,5 +11,5 @@ services:
       - ./app:/go/src/github.com/home_streaming/app
     ports:
       - 3000:3000
-    command: sh -c "cd app && realize start --run"
+    command: sh -c "realize start --run"
 

@@ -9,7 +9,11 @@ RUN set -ex && \
     go get -u github.com/gin-gonic/gin && \
     go get -u github.com/oxequa/realize
 
-WORKDIR /go/src/github.com/home_streaming
+COPY ./app /go/src/github.com/home_streaming/app
+
+WORKDIR /go/src/github.com/home_streaming/app
+
+RUN go mod download
 
 FROM alpine:latest
 
