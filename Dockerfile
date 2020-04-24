@@ -5,9 +5,6 @@ LABEL maintainer="https://gihub.com/popper2710"
 RUN set -ex && \
     apk update && \
     apk add --no-cache git && \
-    apk add gcc libc-dev && \
-    go get -u github.com/gin-gonic/gin && \
-    go get -u github.com/oxequa/realize
 
 COPY ./app /go/src/github.com/home_streaming/app
 
