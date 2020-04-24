@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/gin-contrib/multitemplate"
@@ -9,8 +10,12 @@ import (
 
 func createMyRender() multitemplate.Renderer {
 	r := multitemplate.NewRenderer()
-	r.AddFromFiles("index", "templates/index.gohtml")
-	r.AddFromFiles("video", "templates/view_video.gohtml")
+	html := template.Must(template.ParseFiles("templates/base.gohtml", "templates/index.gohtml"))
+	r.Add("index", html)
+	html = template.Must(template.ParseFiles("templates/base.gohtml", "templates/video.gohtml"))
+	r.Add("video", html)
+	html = template.Must(template.ParseFiles("templates/base.gohtml", "templates/error.gohtml"))
+	r.Add("error", html)
 	return r
 }
 
@@ -21,6 +26,8 @@ type Video struct {
 func main() {
 	router := gin.Default()
 	router.Static("/static", "./static")
+	router.Static("/resources", "./resources")
+	router.StaticFile("/favicon.ico", "./resources/favicon.ico")
 	router.HTMLRender = createMyRender()
 
 	router.GET("/index", func(c *gin.Context) {
@@ -31,8 +38,11 @@ func main() {
 	router.GET("/video/:id", func(c *gin.Context) {
 		var video Video
 		if err := c.ShouldBindUri(&video); err != nil {
-			c.String(http.StatusInternalServerError, "Server Error")
-			return
+			c.HTML(http.StatusInternalServerError, "error", gin.H{
+				"title":   "Server Error",
+				"code":    500,
+				"message": "Server Error",
+			})
 		}
 		if video.Id == "test" {
 			c.HTML(http.StatusOK, "video", gin.H{
@@ -40,7 +50,11 @@ func main() {
 				"video_id": video.Id,
 			})
 		} else {
-			c.String(http.StatusNotFound, "Not Found")
+			c.HTML(http.StatusNotFound, "error", gin.H{
+				"title":   "Page Not Found",
+				"code":    404,
+				"message": "Page Not Found.",
+			})
 		}
 	})
 

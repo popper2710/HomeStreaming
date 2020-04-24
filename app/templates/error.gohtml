@@ -1,0 +1,11 @@
+{{define "scripts"}}
+    <link href="/static/css/error.css" rel="stylesheet">
+{{end}}
+{{define "body"}}
+    <div class="block">
+        <img src="/static/img/error_dog.png">
+        <p>
+            {{.code}} {{.message}}
+        </p>
+    </div>
+{{end}}
