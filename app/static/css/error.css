@@ -1,20 +1,20 @@
-@charset "UTF-8";
-.block{
+.block {
   width: 600px;
   height: auto;
   margin: 5% 20% 0 30%;
   text-align: center;
-  padding: 30px 25% 0 25%;
-}
+  padding: 30px 25% 0 25%; }
+
 img {
   width: 600px;
   height: 50%;
   position: fixed;
-  margin: 0 9% 0 9%;
-}
+  margin: 0 9% 0 9%; }
+
 p {
   position: fixed;
   bottom: 26%;
   margin: 0 19% 0 20%;
-  font-size: 50px;
-}
+  font-size: 50px; }
+
+/*# sourceMappingURL=error.css.map */
