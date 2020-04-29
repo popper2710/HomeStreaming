@@ -12,8 +12,6 @@ services:
     ports:
       - 3000:3000
     command: sh -c "realize start --run"
-    links:
-      - mysql
 
   mysql:
     image: mysql:8.0
@@ -21,7 +19,7 @@ services:
     volumes:
       - ./db/data:/var/lib/mysql
       - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./db/sql:/docker-entrypoint-initdb.d
+      - ./db/sql:/docker-entrypint-initdb.d
     ports:
       - 3306:3306
     environment:
@@ -30,3 +28,13 @@ services:
       MYSQL_USER: docker
       MYSQL_PASSWORD: docker
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    tty: true
+    build:
+      context: ./redis
+      dockerfile: ./Dockerfile
+    volumes:
+    - ./redis/data:/data
+    ports:
+    - 6379:6379

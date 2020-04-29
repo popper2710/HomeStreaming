@@ -23,3 +23,5 @@ RUN set -x && \
     addgroup go && \
     adduser -D -G go go && \
     chown -R go:go /app/app
+
+ENV GIN_MODE release
