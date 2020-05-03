@@ -4,32 +4,17 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"github.com/my-repo/home_streaming/config"
 	"math"
 	"time"
 )
 
 type Secret struct {
-	Database struct {
-		Image    string `yaml:"image"`
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		Dbname   string `yaml:"dbname"`
-	}
 }
 
 func SqlConnect() *gorm.DB {
-	buf, err := ioutil.ReadFile("./config/secret.yaml")
-	if err != nil {
-		panic(err)
-	}
-	var secret Secret
-	err = yaml.Unmarshal(buf, &secret)
-	if err != nil {
-		panic(err)
-	}
-
+	var secret config.Secret
+	secret.Init()
 	DBMS := secret.Database.Image
 	USER := secret.Database.User
 	PASSWORD := secret.Database.Password
@@ -38,6 +23,7 @@ func SqlConnect() *gorm.DB {
 
 	CONNECT := USER + ":" + PASSWORD + "@(" + HOST + ")/" + DBNAME + "?charset=utf8mb4&parseTime=True&loc=Local"
 	var db *gorm.DB
+	var err error
 	for i := 0; i < 5; i++ {
 		db, err = gorm.Open(DBMS, CONNECT)
 		if err == nil {
@@ -53,5 +39,7 @@ func SqlConnect() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Video{})
 	return db
 }
