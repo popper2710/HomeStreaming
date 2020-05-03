@@ -3,7 +3,7 @@
     <script src="//cdn.jsdelivr.net/hls.js/latest/hls.min.js"></script>
 {{end}}
 {{define "body"}}
-<video id="video" class="video-js vjs-default-skin" width="640" height="480" controls preload="auto">
+<video id="video" class="video-js vjs-default-skin" width="640" height="480" controls autoplay>
     <script type="text/javascript">
         // 変換した動画ファイルを指定します。
         var source = '/resources/video/{{ .video_id }}.m3u8';

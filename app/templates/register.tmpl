@@ -1,0 +1,12 @@
+{{define "body"}}
+    {{if .errorMsg}}
+        <div>{{.errorMsg}}</div>
+    {{end}}
+    <form method="post">
+        <input type="text" placeholder="Enter Username" name="username"><br>
+        <input type="email" placeholder="Enter Email" name="email"><br>
+        <input type="password" placeholder="Enter Password" name="password"><br>
+        <input type="password" placeholder="Enter Password Confirmation" name="password_confirmation"><br><br>
+        <input type="submit" value="Register">
+    </form>
+{{end}}
