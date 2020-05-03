@@ -13,7 +13,7 @@ type User struct {
 	Email     string    `gorm:"type:varchar(254);not null"`
 	Password  string    `gorm:"type:varchar(100);not null"`
 	LastLogin time.Time `gorm:"not null"`
-	CreateAt  time.Time `gorm:"not null"`
+	CreatedAt time.Time `gorm:"not null"`
 }
 
 func (u User) Validate() error {
@@ -22,4 +22,17 @@ func (u User) Validate() error {
 		validation.Field(&u.Name, validation.Required, validation.Length(1, 30)),
 		validation.Field(&u.Email, validation.Required, is.Email),
 		validation.Field(&u.Password, validation.Required))
+}
+
+type Video struct {
+	Id        int       `gorm:"type:int AUTO_INCREMENT"`
+	Uid       string    `gorm:"type:string;varchar(36);not null;unique"`
+	Name      string    `gorm:"type:varchar(500)';not null;default:'Untitled'"`
+	CreatedAt time.Time `gorm:"not null"`
+}
+
+func (v Video) Validate() error {
+	return validation.ValidateStruct(&v,
+		validation.Field(&v.Uid, validation.Required, is.UUIDv4),
+	)
 }
