@@ -56,5 +56,6 @@ func Router() *gin.Engine {
 	router.POST("/register", PostRegister)
 	router.GET("/upload", GetUpload)
 	router.POST("/upload", PostUpload)
+	router.NoRoute(NotFound)
 	return router
 }
