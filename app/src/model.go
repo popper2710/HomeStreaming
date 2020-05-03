@@ -26,8 +26,8 @@ func (u User) Validate() error {
 
 type Video struct {
 	Id        int       `gorm:"type:int AUTO_INCREMENT"`
-	Uid       string    `gorm:"type:string;varchar(36);not null;unique"`
-	Name      string    `gorm:"type:varchar(500)';not null;default:'Untitled'"`
+	Uid       string    `gorm:"type:varchar(36);not null;unique"`
+	Name      string    `gorm:"type:varchar(500);not null;default:'Untitled'"`
 	CreatedAt time.Time `gorm:"not null"`
 }
 

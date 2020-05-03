@@ -1,14 +1,17 @@
 package src
 
 import (
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -24,8 +27,8 @@ func GetIndex(c *gin.Context) {
 }
 
 func GetVideo(c *gin.Context) {
-	var videoId UbVideoId
-	if err := c.ShouldBindUri(&videoId); err != nil {
+	var ubVideo UbVideo
+	if err := c.ShouldBindUri(&ubVideo); err != nil {
 		errorPage(c, 400)
 	}
 	if videoId.Id == "test" {
@@ -137,22 +140,50 @@ func GetUpload(c *gin.Context) {
 }
 
 func PostUpload(c *gin.Context) {
-	file, header, err := c.Request.FormFile("file")
+	uid, err := uuid.NewRandom()
 	if err != nil {
+		errorPage(c, 500)
+	}
+	videoName := c.PostForm("filename")
+	file, header, err := c.Request.FormFile("file")
+	if header == nil || err != nil {
 		errorPage(c, 400)
 	}
-	fileName := header.Filename
+	ext := extractExtension(header.Filename)
 	dir, _ := os.Getwd()
-	out, err := os.Create(dir + "/resources/video/" + fileName)
-	if err != nil {
-		panic(err)
-	}
+	videoPath := fmt.Sprintf("%s/resources/video/%s", dir, uid.String())
+	os.Mkdir(videoPath, 777)
+	out, _ := os.Create(videoPath + "/hs" + ext)
 	defer out.Close()
 	_, err = io.Copy(out, file)
+
+	db := SqlConnect()
+	defer db.Close()
+	video := Video{
+		Id:        0,
+		Uid:       uid.String(),
+		Name:      videoName,
+		CreatedAt: time.Now(),
+	}
+	if err := video.Validate(); err != nil {
+		errorPage(c, 400)
+	}
+	db.Create(&video)
+
 	c.String(http.StatusOK, "Upload Success")
 }
 
+func NotFound(c *gin.Context) {
+	errorPage(c, 404)
+}
+
 // =================[private functions]=====================
+func extractExtension(filename string) string {
+	pos := strings.LastIndex(filename, ".")
+	ext := filename[pos:]
+	return ext
+}
+
 func errorPage(c *gin.Context, code int) {
 	codeMap := map[int]string{400: "Bad Request", 404: "Not Found", 500: "Server Error"}
 	if v, ok := codeMap[code]; ok {

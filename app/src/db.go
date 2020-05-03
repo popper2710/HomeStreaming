@@ -39,7 +39,6 @@ func SqlConnect() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Video{})
+	db.AutoMigrate(&User{}, &Video{})
 	return db
 }
