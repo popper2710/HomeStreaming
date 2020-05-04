@@ -4,5 +4,9 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="clappr" level="application" />
+    <orderEntry type="library" name="level-selector" level="application" />
+    <orderEntry type="library" name="clappr-pip" level="application" />
+    <orderEntry type="library" name="clappr-pip-plugin" level="application" />
   </component>
 </module>
