@@ -11,11 +11,13 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-type UbVideoId struct {
+type UbVideo struct {
 	Id string `uri:"id" binding:"required"`
 }
 
@@ -31,13 +33,18 @@ func GetVideo(c *gin.Context) {
 	if err := c.ShouldBindUri(&ubVideo); err != nil {
 		errorPage(c, 400)
 	}
-	if videoId.Id == "test" {
-		c.HTML(http.StatusOK, "videoId", gin.H{
-			"title":    "Video Page",
-			"video_id": videoId.Id,
-		})
-	} else {
+	var video Video
+	db := SqlConnect()
+	defer db.Close()
+	db.Where(&Video{Uid: ubVideo.Id}).Find(&video)
+	if video.Uid == "" {
 		errorPage(c, 404)
+	} else {
+		c.HTML(http.StatusOK, "video", gin.H{
+			"title":     "Video Page",
+			"videoId":   video.Uid,
+			"videoName": video.Name,
+		})
 	}
 }
 
@@ -151,24 +158,34 @@ func PostUpload(c *gin.Context) {
 	}
 	ext := extractExtension(header.Filename)
 	dir, _ := os.Getwd()
-	videoPath := fmt.Sprintf("%s/resources/video/%s", dir, uid.String())
-	os.Mkdir(videoPath, 777)
-	out, _ := os.Create(videoPath + "/hs" + ext)
+	videoDir := fmt.Sprintf("%s/resources/video/%s", dir, uid.String())
+	os.Mkdir(videoDir, 777)
+	videoPath := videoDir + "/hs" + ext
+	out, _ := os.Create(videoPath)
 	defer out.Close()
 	_, err = io.Copy(out, file)
 
 	db := SqlConnect()
 	defer db.Close()
 	video := Video{
-		Id:        0,
-		Uid:       uid.String(),
-		Name:      videoName,
-		CreatedAt: time.Now(),
+		Uid:      uid.String(),
+		Name:     videoName,
+		IsEncode: false,
 	}
 	if err := video.Validate(); err != nil {
 		errorPage(c, 400)
 	}
 	db.Create(&video)
+	go func() {
+		if err := convertHls(videoPath); err != nil {
+			println(err)
+		} else {
+			db := SqlConnect()
+			defer db.Close()
+			video.IsEncode = true
+			db.Save(&video)
+		}
+	}()
 
 	c.String(http.StatusOK, "Upload Success")
 }
@@ -182,6 +199,32 @@ func extractExtension(filename string) string {
 	pos := strings.LastIndex(filename, ".")
 	ext := filename[pos:]
 	return ext
+}
+
+func convertHls(inputPath string) error {
+	fmt.Println("Start convert to Hls...")
+	prev, err := filepath.Abs(".")
+	if err != nil {
+		return err
+	}
+	defer os.Chdir(prev)
+
+	filename := filepath.Base(inputPath)
+	vdir := filepath.Dir(inputPath)
+	os.Chdir(vdir)
+
+	cmd := exec.Command("ffmpeg", "-i", filename, "-vcodec",
+		"libx264", "-vprofile", "baseline", "-acodec", "copy", "-ar",
+		"44100", "-ac", "1", "-f", "segment", "-segment_format", "mpegts",
+		"-segment_time", "10", "-segment_list", "hs.m3u8", "hs%3d.ts")
+	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
+	if err != nil {
+		println("Error occurred")
+	}
+	fmt.Println("end")
+
+	return err
 }
 
 func errorPage(c *gin.Context, code int) {

@@ -13,6 +13,7 @@ type User struct {
 	Email     string    `gorm:"type:varchar(254);not null"`
 	Password  string    `gorm:"type:varchar(100);not null"`
 	LastLogin time.Time `gorm:"not null"`
+	UpdatedAt time.Time `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
 }
 
@@ -28,6 +29,8 @@ type Video struct {
 	Id        int       `gorm:"type:int AUTO_INCREMENT"`
 	Uid       string    `gorm:"type:varchar(36);not null;unique"`
 	Name      string    `gorm:"type:varchar(500);not null;default:'Untitled'"`
+	IsEncode  bool      `gorm:"type:bool;not null;default:false"`
+	UpdatedAt time.Time `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
 }
 
