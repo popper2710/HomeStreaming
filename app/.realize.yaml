@@ -15,7 +15,7 @@ schema:
   watcher:
     extensions:
     - go
-    - gohtml
+    - tmpl
     - yaml
     - css
     - js

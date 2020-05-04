@@ -37,7 +37,7 @@ func GetVideo(c *gin.Context) {
 	db := SqlConnect()
 	defer db.Close()
 	db.Where(&Video{Uid: ubVideo.Id}).Find(&video)
-	if video.Uid == "" {
+	if video.Uid == "" || !video.IsEncode {
 		errorPage(c, 404)
 	} else {
 		c.HTML(http.StatusOK, "video", gin.H{
@@ -66,7 +66,7 @@ func PostLogin(c *gin.Context) {
 
 	db := SqlConnect()
 	defer db.Close()
-	db.Where("name = ?", username).Find(&user)
+	db.Where(&User{Name: username}).Find(&user)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		c.HTML(http.StatusOK, "login", gin.H{
 			"title":     "Login Page",
@@ -177,7 +177,7 @@ func PostUpload(c *gin.Context) {
 	}
 	db.Create(&video)
 	go func() {
-		if err := convertHls(videoPath); err != nil {
+		if err := encodeHls(videoPath); err != nil {
 			println(err)
 		} else {
 			db := SqlConnect()
@@ -201,30 +201,21 @@ func extractExtension(filename string) string {
 	return ext
 }
 
-func convertHls(inputPath string) error {
+func encodeHls(inputPath string) error {
 	fmt.Println("Start convert to Hls...")
-	prev, err := filepath.Abs(".")
-	if err != nil {
+	fmt.Println("Encoding input path: " + inputPath)
+	outputPath := filepath.Dir(inputPath)
+	cmd := exec.Command("./create-vod-hls.sh", inputPath, outputPath)
+	if err := cmd.Start(); err != nil {
+		println("Error occurred during encoding upload video")
 		return err
 	}
-	defer os.Chdir(prev)
-
-	filename := filepath.Base(inputPath)
-	vdir := filepath.Dir(inputPath)
-	os.Chdir(vdir)
-
-	cmd := exec.Command("ffmpeg", "-i", filename, "-vcodec",
-		"libx264", "-vprofile", "baseline", "-acodec", "copy", "-ar",
-		"44100", "-ac", "1", "-f", "segment", "-segment_format", "mpegts",
-		"-segment_time", "10", "-segment_list", "hs.m3u8", "hs%3d.ts")
-	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
-	if err != nil {
-		println("Error occurred")
+	if err := cmd.Wait(); err != nil {
+		println("Error occurred during encoding upload video")
+		return err
 	}
-	fmt.Println("end")
-
-	return err
+	fmt.Println("Encoding completed successfully")
+	return nil
 }
 
 func errorPage(c *gin.Context, code int) {
