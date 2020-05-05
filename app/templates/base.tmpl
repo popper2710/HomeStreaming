@@ -23,12 +23,24 @@
             <li><a href="#">Video</a></li>
             <li><a href="#">Picture</a></li>
             <li><a href="#">Music</a></li>
+            {{if .user }}
+                {{if ne .user.Name ""}}
+                    <li><a href="#">{{.user.Name}}</a></li>
+                    <li><a href="logout">Logout</a></li>
+                {{else}}
+                    <li><a href="login">Login</a></li>
+                    <li><a href="register">Register</a></li>
+                {{end}}
+            {{else}}
+                <li><a href="login">Login</a></li>
+                <li><a href="register">Register</a></li>
+            {{end}}
         </ul>
     </nav>
 </header>
-    <div class="content">
-        {{template "body" .}}
-    </div>
+<div class="content">
+    {{template "body" .}}
+</div>
 </body>
 </html>
 

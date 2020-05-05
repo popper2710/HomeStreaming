@@ -24,11 +24,15 @@ type UbVideo struct {
 // =================[public functions]=====================
 func GetIndex(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", gin.H{
-		"title": "Main Title",
+		"title": "Main Page",
+		"user":  loginUser(c),
 	})
 }
 
 func GetVideo(c *gin.Context) {
+	if !authCheck(c) {
+		return
+	}
 	var ubVideo UbVideo
 	if err := c.ShouldBindUri(&ubVideo); err != nil {
 		errorPage(c, 400)
@@ -42,6 +46,7 @@ func GetVideo(c *gin.Context) {
 	} else {
 		c.HTML(http.StatusOK, "video", gin.H{
 			"title":     "Video Page",
+			"user":      loginUser(c),
 			"videoId":   video.Uid,
 			"videoName": video.Name,
 		})
@@ -75,16 +80,12 @@ func PostLogin(c *gin.Context) {
 		return
 	}
 	login(c, user.Uid)
-	c.String(http.StatusOK, user.Uid)
+	c.Redirect(http.StatusMovedPermanently, "index")
 }
 
 func GetLogout(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Clear()
-	if err := session.Save(); err != nil {
-		panic(err)
-	}
-	c.String(http.StatusOK, "session Deleted")
+	logout(c)
+	c.String(http.StatusOK, "Session Deleted")
 }
 
 func GetRegister(c *gin.Context) {
@@ -141,12 +142,19 @@ func PostRegister(c *gin.Context) {
 }
 
 func GetUpload(c *gin.Context) {
+	if !authCheck(c) {
+		return
+	}
 	c.HTML(http.StatusOK, "upload", gin.H{
 		"title": "Upload Page",
+		"user":  loginUser(c),
 	})
 }
 
 func PostUpload(c *gin.Context) {
+	if !authCheck(c) {
+		return
+	}
 	uid, err := uuid.NewRandom()
 	if err != nil {
 		errorPage(c, 500)
@@ -223,6 +231,7 @@ func errorPage(c *gin.Context, code int) {
 	if v, ok := codeMap[code]; ok {
 		c.HTML(http.StatusBadRequest, "error", gin.H{
 			"title":   v,
+			"user":    loginUser(c),
 			"code":    code,
 			"message": v,
 		})
@@ -231,6 +240,20 @@ func errorPage(c *gin.Context, code int) {
 		panic("specified incorrect error code:" + string(code))
 	}
 
+}
+
+func loginUser(c *gin.Context) User {
+	if !isAuthenticated(c) {
+		return User{}
+	}
+	session := sessions.Default(c)
+	v := session.Get("uid")
+	db := SqlConnect()
+	defer db.Close()
+	var user User
+	db.Where(&User{Uid: v.(string)}).Find(&user)
+	fmt.Println(user)
+	return user
 }
 
 func extractULID() string {
@@ -245,10 +268,28 @@ func isAuthenticated(c *gin.Context) bool {
 	return v != nil
 }
 
+func authCheck(c *gin.Context) bool {
+	if !isAuthenticated(c) {
+		c.HTML(http.StatusOK, "index", gin.H{
+			"title": "Main Page",
+		})
+		return false
+	}
+	return true
+}
+
 func login(c *gin.Context, uid string) {
 	session := sessions.Default(c)
 	session.Set("uid", uid)
 	if err := session.Save(); err != nil {
 		errorPage(c, 400)
+	}
+}
+
+func logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	if err := session.Save(); err != nil {
+		panic(err)
 	}
 }
