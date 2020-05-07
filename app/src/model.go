@@ -32,6 +32,8 @@ type Video struct {
 	IsEncode  bool      `gorm:"type:bool;not null;default:false"`
 	UpdatedAt time.Time `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
+	UserId    int       `gorm:"type:int"`
+	User      User
 }
 
 func (v Video) Validate() error {

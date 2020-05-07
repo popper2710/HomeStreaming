@@ -175,9 +175,11 @@ func PostUpload(c *gin.Context) {
 
 	db := SqlConnect()
 	defer db.Close()
+	currentUser := loginUser(c)
 	video := Video{
 		Uid:      uid.String(),
 		Name:     videoName,
+		UserId:   currentUser.Id,
 		IsEncode: false,
 	}
 	if err := video.Validate(); err != nil {
