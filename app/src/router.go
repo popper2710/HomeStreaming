@@ -15,7 +15,7 @@ func parsedHtmlWithBase(name string) *template.Template {
 }
 func createMyRender() multitemplate.Renderer {
 	renderer := multitemplate.NewRenderer()
-	pathList := []string{"index", "video", "upload", "login", "register", "error"}
+	pathList := []string{"index", "video", "upload", "login", "register", "videoList", "error"}
 	for _, v := range pathList {
 		renderer.Add(v, parsedHtmlWithBase(v))
 	}
@@ -56,6 +56,7 @@ func Router() *gin.Engine {
 	router.POST("/register", PostRegister)
 	router.GET("/upload", GetUpload)
 	router.POST("/upload", PostUpload)
+	router.GET("/list/:media", GetList)
 	router.NoRoute(NotFound)
 	return router
 }

@@ -17,10 +17,6 @@ import (
 	"time"
 )
 
-type UbVideo struct {
-	Id string `uri:"id" binding:"required"`
-}
-
 // =================[public functions]=====================
 func GetIndex(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", gin.H{
@@ -30,17 +26,11 @@ func GetIndex(c *gin.Context) {
 }
 
 func GetVideo(c *gin.Context) {
-	if !authCheck(c) {
-		return
-	}
-	var ubVideo UbVideo
-	if err := c.ShouldBindUri(&ubVideo); err != nil {
-		errorPage(c, 400)
-	}
+	id := c.Param("id")
 	var video Video
 	db := SqlConnect()
 	defer db.Close()
-	db.Where(&Video{Uid: ubVideo.Id}).Find(&video)
+	db.Where(&Video{Uid: id}).Find(&video)
 	if video.Uid == "" || !video.IsEncode {
 		errorPage(c, 404)
 	} else {
@@ -200,6 +190,22 @@ func PostUpload(c *gin.Context) {
 	c.String(http.StatusOK, "Upload Success")
 }
 
+func GetList(c *gin.Context) {
+	media := c.Param("media")
+	if media == "video" {
+		db := SqlConnect()
+		defer db.Close()
+		var videos []Video
+		db.Find(&videos)
+		c.HTML(http.StatusOK, "videoList", gin.H{
+			"title":  "Video List",
+			"user":   loginUser(c),
+			"videos": videos,
+		})
+	} else {
+		errorPage(c, 400)
+	}
+}
 func NotFound(c *gin.Context) {
 	errorPage(c, 404)
 }
