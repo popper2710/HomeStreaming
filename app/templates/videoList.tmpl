@@ -1,8 +1,11 @@
+{{define "scripts"}}
+    <link href="/static/css/videoList.css" rel="stylesheet">
+{{end}}
 {{define "body" }}
     {{range .videos}}
         <div>
             <a href="/video/{{.Uid}}"><img alt="Not Found" src="/resources/video/{{.Uid}}/thumb.jpg"></a>
-            <div>Title: {{.Name}}</div>
+            <a href="/video/{{.Uid}}">{{.Name}}</a>
         </div>
     {{end}}
 {{end}}
