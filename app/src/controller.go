@@ -196,7 +196,7 @@ func GetList(c *gin.Context) {
 		db := SqlConnect()
 		defer db.Close()
 		var videos []Video
-		db.Find(&videos)
+		db.Where(&Video{IsEncode: true}).Find(&videos)
 		c.HTML(http.StatusOK, "videoList", gin.H{
 			"title":  "Video List",
 			"user":   loginUser(c),
