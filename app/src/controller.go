@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/locales/currency"
 	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -22,6 +23,7 @@ func GetIndex(c *gin.Context) {
 	c.HTML(http.StatusOK, "index", gin.H{
 		"title": "Main Page",
 		"user":  loginUser(c),
+		"msg":   "Hello, World!",
 	})
 }
 
@@ -150,6 +152,11 @@ func PostUpload(c *gin.Context) {
 		errorPage(c, 500)
 	}
 	videoName := c.PostForm("filename")
+	isPrivateStr := c.PostForm("is_private")
+	isPrivate := false
+	if isPrivateStr == "1" {
+		isPrivate = true
+	}
 	file, header, err := c.Request.FormFile("file")
 	if header == nil || err != nil {
 		errorPage(c, 400)
@@ -167,10 +174,11 @@ func PostUpload(c *gin.Context) {
 	defer db.Close()
 	currentUser := loginUser(c)
 	video := Video{
-		Uid:      uid.String(),
-		Name:     videoName,
-		UserId:   currentUser.Id,
-		IsEncode: false,
+		Uid:       uid.String(),
+		Name:      videoName,
+		UserId:    currentUser.Id,
+		IsPrivate: isPrivate,
+		IsEncode:  false,
 	}
 	if err := video.Validate(); err != nil {
 		errorPage(c, 400)
@@ -196,7 +204,10 @@ func GetList(c *gin.Context) {
 		db := SqlConnect()
 		defer db.Close()
 		var videos []Video
-		db.Where(&Video{IsEncode: true}).Find(&videos)
+		if isAuthenticated(c) {
+			currentUser := loginUser(c)
+			db.Where(&Video{IsEncode: true, UserId: currentUser.Uid}).Find(&videos)
+		}
 		c.HTML(http.StatusOK, "videoList", gin.H{
 			"title":  "Video List",
 			"user":   loginUser(c),

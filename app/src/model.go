@@ -29,6 +29,7 @@ type Video struct {
 	Id        int       `gorm:"type:int AUTO_INCREMENT"`
 	Uid       string    `gorm:"type:varchar(36);not null;unique"`
 	Name      string    `gorm:"type:varchar(500);not null;default:'Untitled'"`
+	IsPrivate bool      `gorm:"type:bool;not null;default:true"`
 	IsEncode  bool      `gorm:"type:bool;not null;default:false"`
 	UpdatedAt time.Time `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
