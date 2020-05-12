@@ -78,7 +78,10 @@ echo -e "Executing command:\nffmpeg ${misc_params} -i ${source} ${cmd}"
 ffmpeg ${misc_params} -i ${source} ${cmd}
 
 # create master playlist file
-echo -e "${master_playlist}" > ${target}/playlist.m3u8
-ffmpeg -i ${source} -ss 30 -vframes 1 -f image2 -s 1920x1080 ${target}/thumb.jpg
+echo -e "${master_playlist}" > "${target}"/playlist.m3u8
+
+# create thumbnail
+thumbnail_time=$(echo "$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 ${source}) / 2" | bc || echo "")
+ffmpeg -i "${source}" -ss "${thumbnail_time}" -vframes 1 -f image2 -s 1920x1080 "${target}"/thumb.jpg
 
 echo "Done - encoded HLS is at ${target}/"
