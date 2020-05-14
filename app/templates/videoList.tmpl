@@ -2,10 +2,12 @@
     <link href="/static/css/videoList.css" rel="stylesheet">
 {{end}}
 {{define "body" }}
-    {{range .videos}}
-        <div>
-            <a href="/video/{{.Uid}}"><img alt="Not Found" src="/resources/video/{{.Uid}}/thumb.jpg"></a>
-            <a href="/video/{{.Uid}}">{{.Name}}</a>
-        </div>
-    {{end}}
+    <div class="v_list">
+        {{range .videos}}
+            <div class="v_col">
+                <a href="/video/{{.Uid}}"><img alt="Not Found" src="/resources/video/{{.Uid}}/thumb.jpg"></a>
+                <span class="title"><a href="/video/{{.Uid}}">{{.Name}}</a></span>
+            </div>
+        {{end}}
+    </div>
 {{end}}

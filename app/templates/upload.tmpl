@@ -1,8 +1,8 @@
 {{define "body"}}
 <form method="post" enctype="multipart/form-data">
-    <input type="text" name="filename">
-    <input type="checkbox" name="is_private" value="1">
-    <input type="file" name="file">
-    <input type="submit" value="Submit">
+    <div><input type="text" name="filename"></div>
+    <div><input type="checkbox" name="is_private" value="1"><p>Private Video</p></div>
+    <div><input type="file" name="file"></div>
+    <div><input type="submit" value="Submit"></div>
 </form>
 {{end}}

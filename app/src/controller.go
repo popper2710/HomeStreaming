@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/locales/currency"
 	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -206,7 +205,9 @@ func GetList(c *gin.Context) {
 		var videos []Video
 		if isAuthenticated(c) {
 			currentUser := loginUser(c)
-			db.Where(&Video{IsEncode: true, UserId: currentUser.Uid}).Find(&videos)
+			db.Where(&Video{IsEncode: true, UserId: currentUser.Id}).Or(&Video{IsEncode: true, IsPrivate: false}).Find(&videos)
+		} else {
+			db.Where(&Video{IsEncode: true, IsPrivate: false}).Find(&videos)
 		}
 		c.HTML(http.StatusOK, "videoList", gin.H{
 			"title":  "Video List",
@@ -271,7 +272,6 @@ func loginUser(c *gin.Context) User {
 	defer db.Close()
 	var user User
 	db.Where(&User{Uid: v.(string)}).Find(&user)
-	fmt.Println(user)
 	return user
 }
 

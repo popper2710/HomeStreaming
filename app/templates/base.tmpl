@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta charset="UTF-8">
     <title>{{.title}}</title>
-    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Noto+Sans+JP:400,700" rel="stylesheet">
     <link href="/static/css/base.css" rel="stylesheet">
     <link rel="icon" href="/favicon.ico">
@@ -25,19 +24,25 @@
             <li><a href="#">Music</a></li>
             {{if .user }}
                 {{if ne .user.Name ""}}
+                    <li><a href="/upload">Upload</a></li>
                     <li><a href="#">{{.user.Name}}</a></li>
-                    <li><a href="logout">Logout</a></li>
+                    <li><a href="/logout">Logout</a></li>
                 {{else}}
-                    <li><a href="login">Login</a></li>
-                    <li><a href="register">Register</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
                 {{end}}
             {{else}}
-                <li><a href="login">Login</a></li>
-                <li><a href="register">Register</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
             {{end}}
         </ul>
     </nav>
 </header>
+{{if .msg}}
+    <div class="alert success">
+            {{.msg}}
+    </div>
+{{end}}
 <div class="content">
     {{template "body" .}}
 </div>
